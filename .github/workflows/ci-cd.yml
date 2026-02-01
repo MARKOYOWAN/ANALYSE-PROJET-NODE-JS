@@ -1,0 +1,85 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  quality-and-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: analyse_text
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚡ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm' # Active le cache automatique
+
+      - name: 📦 Install dependencies
+        run: npm ci # 'npm ci' est plus rapide et propre en CI que 'npm install'
+
+      - name: ✏️ Run Lint
+        run: npm run lint
+
+      - name: 🏗️ Build TypeScript
+        run: npm run build
+
+      # Injecte tes tables et triggers dans la DB de test
+    #   - name: 🗄️ Setup Database Schema
+    #     run: PGPASSWORD=postgres psql -h localhost -U postgres -d analyse_text -f bd.sql
+
+    #   - name: ✅ Run Unit Tests
+    #     run: npm test
+    #     env:
+    #       DB_HOST: localhost
+    #       DB_PORT: 5432
+    #       DB_USER: postgres
+    #       DB_PASSWORD: postgres
+    #       DB_NAME: analyse_text
+
+    #   - name: 🐳 Build Docker Image
+    #     run: docker compose build
+
+    #   - name: 🌐 Docker Health Check
+    #     run: |
+    #       docker compose up -d
+    #       # Attente intelligente de l'API (max 30s)
+    #       for i in {1..10}; do
+    #         if curl -s http://localhost:3000/health | grep -q "UP"; then
+    #           echo "✅ API is UP!"
+    #           exit 0
+    #         fi
+    #         echo "⏳ Waiting for API... ($i)"
+    #         sleep 3
+    #       done
+    #       echo "❌ API failed to start"
+    #       docker compose logs
+    #       exit 1
+
+    #   # Cette étape s'exécute TOUJOURS, même si le Health Check échoue
+    #   - name: 🧹 Cleanup Docker
+    #     if: always()
+    #     run: docker compose down
