@@ -1,3 +1,9 @@
-import { startServer } from "./app";
+import { createApp } from "./app";
 
-startServer();
+const PORT = process.env.PORT || 3000;
+
+const app = createApp();
+
+app.listen(PORT, () => {
+    console.log(`Analyse Text API running on http://localhost:${PORT}`);
+});
