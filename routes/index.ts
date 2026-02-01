@@ -1,4 +1,5 @@
 import { Application } from "express";
+
 import healthRoutes from "./health.routes";
 
 /**

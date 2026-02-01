@@ -1,25 +1,18 @@
 name: CI/CD Pipeline
 
-# ---------------------------------------------------------------------------
-# Déclenche le workflow sur push sur develop et PR vers main
-# ---------------------------------------------------------------------------
 on:
   push:
     branches:
       - develop
+      - main
   pull_request:
     branches:
       - main
 
 jobs:
-  build-test-docker:
-    # Utilisation d'une machine Ubuntu pour exécuter le pipeline
+  quality-and-tests:
     runs-on: ubuntu-latest
 
-    # -----------------------------------------------------------------------
-    # Services nécessaires pour les tests d'intégration
-    # Ici PostgreSQL pour tester la connexion DB
-    # -----------------------------------------------------------------------
     services:
       postgres:
         image: postgres:15
@@ -36,57 +29,57 @@ jobs:
           --health-retries 5
 
     steps:
-      # ---------------------------------------------------------------------
-      # Récupération du code source du repository
-      # ---------------------------------------------------------------------
       - name: 🔄 Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # ---------------------------------------------------------------------
-      # Installer la version Node.js utilisée par le projet
-      # ---------------------------------------------------------------------
       - name: ⚡ Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm' # Active le cache automatique
 
-      # ---------------------------------------------------------------------
-      # Installer toutes les dépendances npm
-      # ---------------------------------------------------------------------
       - name: 📦 Install dependencies
-        run: npm install
+        run: npm ci # 'npm ci' est plus rapide et propre en CI que 'npm install'
 
-      # ---------------------------------------------------------------------
-      # Compiler le code TypeScript en JavaScript
-      # ---------------------------------------------------------------------
-      - name: 🏗️ Build TypeScript
-        run: npm run build
-
-      # ---------------------------------------------------------------------
-      # Lancer le lint pour vérifier le respect des règles de style
-      # ---------------------------------------------------------------------
       - name: ✏️ Run Lint
         run: npm run lint
 
-      # ---------------------------------------------------------------------
-      # Lancer les tests unitaires pour s'assurer que tout fonctionne
-      # ---------------------------------------------------------------------
+      - name: 🏗️ Build TypeScript
+        run: npm run build
+
+      # Injecte tes tables et triggers dans la DB de test
+      - name: 🗄️ Setup Database Schema
+        run: PGPASSWORD=postgres psql -h localhost -U postgres -d analyse_text -f bd.sql
+
       - name: ✅ Run Unit Tests
         run: npm test
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: analyse_text
 
-      # ---------------------------------------------------------------------
-      # Construire les conteneurs Docker pour l'application
-      # ---------------------------------------------------------------------
-      - name: 🐳 Build Docker containers
-        run: docker-compose -f docker-compose.yml build
+      - name: 🐳 Build Docker Image
+        run: docker compose build
 
-      # ---------------------------------------------------------------------
-      # Lancer l'application dans Docker et tester le endpoint /health
-      # Vérifie que le serveur est bien UP
-      # ---------------------------------------------------------------------
-      - name: 🌐 Test Health Endpoint
+      - name: 🌐 Docker Health Check
         run: |
-          docker-compose -f docker-compose.yml up -d
-          sleep 10
-          curl -s http://localhost:3000/health | grep '"status":"UP"'
-          docker-compose down
+          docker compose up -d
+          # Attente intelligente de l'API (max 30s)
+          for i in {1..10}; do
+            if curl -s http://localhost:3000/health | grep -q "UP"; then
+              echo "✅ API is UP!"
+              exit 0
+            fi
+            echo "⏳ Waiting for API... ($i)"
+            sleep 3
+          done
+          echo "❌ API failed to start"
+          docker compose logs
+          exit 1
+
+      # Cette étape s'exécute TOUJOURS, même si le Health Check échoue
+      - name: 🧹 Cleanup Docker
+        if: always()
+        run: docker compose down

@@ -1,4 +1,4 @@
-import express, { Application, Request, Response, NextFunction } from "express";
+import express, { Application } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -23,8 +23,10 @@ export const setupMiddlewares = (app: Application): void => {
   app.use(
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100, // Max 100 requêtes par IP
+      limit: 100, // Dans les versions récentes d'express-rate-limit, 'max' est devenu 'limit'
       message: { success: false, message: "Trop de requêtes, réessayez plus tard" },
+      standardHeaders: true, // Retourne les infos de limite dans les headers `RateLimit-*`
+      legacyHeaders: false, // Désactive les headers `X-RateLimit-*`
     })
   );
 };

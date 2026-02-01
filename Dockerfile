@@ -1,23 +1,17 @@
-# Utiliser l'image Node.js officielle
-FROM node:22
-
-# Créer le répertoire de travail
-WORKDIR /usr/src/app
-
-# Copier package.json et package-lock.json
+# Étape 1 : Build
+FROM node:22-alpine AS builder
+WORKDIR /app
 COPY package*.json ./
-
-# Installer les dépendances
-RUN npm install
-
-# Copier le code source
+RUN npm ci
 COPY . .
-
-# Compiler TypeScript
 RUN npm run build
 
-# Exposer le port
-EXPOSE 3000
+# Étape 2 : Runtime
+FROM node:22-alpine AS runner
+WORKDIR /app
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+RUN npm ci --omit=dev
 
-# Commande pour démarrer le serveur
-CMD ["npm", "start"]
+EXPOSE 3000
+CMD ["node", "dist/server.js"]
