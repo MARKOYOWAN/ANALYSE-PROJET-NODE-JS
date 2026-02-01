@@ -3,8 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
-import { setupSwagger } from "../config/swagger";
-import { setupRoutes } from "../routes";
+import { setupSwagger } from "../config/swagger"; 
 
 // ---------------------------------------------------------------------------
 // Charger les variables d'environnement depuis le fichier .env
