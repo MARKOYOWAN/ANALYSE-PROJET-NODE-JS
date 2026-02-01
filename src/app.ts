@@ -4,6 +4,7 @@ import helmet from "helmet";
 import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
 import { setupSwagger } from "../config/swagger";
+import { setupRoutes } from "../routes";
 
 // ---------------------------------------------------------------------------
 // Charger les variables d'environnement depuis le fichier .env
@@ -46,13 +47,8 @@ export const createApp = (): Application => {
         })
     );
 
-    // -----------------------------------------------------------------------
-    // Route de santé (Health Check)
-    // Permet de vérifier si l'API est en fonctionnement
-    // -----------------------------------------------------------------------
-    app.get("/health", (req: Request, res: Response) => {
-        res.status(200).json({ status: "UP", message: "Analyse Text API is running" });
-    });
+    // ----------------- Routes -----------------
+   // setupRoutes(app);
 
     // -----------------------------------------------------------------------
     // Swagger - Documentation interactive de l'API
