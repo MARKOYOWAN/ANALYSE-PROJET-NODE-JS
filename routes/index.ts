@@ -1,17 +1,20 @@
 import { Application } from "express";
-//import sampleRoutes from "./sample.routes";
+import healthRoutes from "./health.routes";
 
 /**
  * setupRoutes
  * -------------------
- * Fonction pour centraliser toutes les routes de l'application
+ * Centralise toutes les routes de l'application
  */
 export const setupRoutes = (app: Application) => {
-    // Toutes les routes liées aux exemples
-    //app.use("/api/sample", sampleRoutes);
+    // Routes health
+    app.use("/health", healthRoutes);
 
-    // Gestion des routes non trouvées (404)
-    app.use("*", (req, res) => {
+    // Autres routes ici
+    // app.use("/api/texts", textRoutes);
+
+    // 👇 Middleware catch-all 404 pour toutes les routes non définies
+    app.use((req, res) => {
         res.status(404).json({
             success: false,
             message: "Endpoint non trouvé",

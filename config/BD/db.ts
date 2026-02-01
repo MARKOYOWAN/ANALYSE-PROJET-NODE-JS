@@ -1,15 +1,16 @@
 import { Pool } from "pg";
 import dotenv from "dotenv";
 
-// Charger les variables d'environnement
+// ---------------------------------------------------------------------------
+// Charger les variables d'environnement depuis le fichier .env
+// ---------------------------------------------------------------------------
 dotenv.config();
 
-/**
- * Configuration de la base de données PostgreSQL
- * ---------------------------------------------
- * Utilisation d'un Pool pour gérer les connexions efficacement
- */
-const pool = new Pool({
+// ---------------------------------------------------------------------------
+// Configuration de la base de données PostgreSQL
+// Utilisation d'un Pool pour gérer efficacement les connexions
+// ---------------------------------------------------------------------------
+const pool: Pool = new Pool({
   host: process.env.DB_HOST || "localhost",
   port: Number(process.env.DB_PORT) || 5432,
   user: process.env.DB_USER || "postgres",
@@ -17,18 +18,23 @@ const pool = new Pool({
   database: process.env.DB_NAME || "analyse_text",
 });
 
-/**
- * Fonction pour tester la connexion à la base de données
- */
-export const DBConnection = async () => {
+// ---------------------------------------------------------------------------
+// DBConnection
+// -------------------------
+// Fonction pour tester la connexion à la base de données PostgreSQL
+// ---------------------------------------------------------------------------
+export const DBConnection = async (): Promise<void> => {
   try {
     const client = await pool.connect();
     console.log("Connexion à PostgreSQL réussie !");
-    client.release();
-  } catch (err) {
+    client.release(); // Libère la connexion
+  } catch (err: unknown) {
     console.error("Impossible de se connecter à PostgreSQL :", err);
-    process.exit(1); // Stop l'application si DB non accessible
+    process.exit(1); // Stoppe l'application si DB non accessible
   }
 };
 
+// ---------------------------------------------------------------------------
+// Export du pool pour exécuter des requêtes depuis les repositories
+// ---------------------------------------------------------------------------
 export default pool;

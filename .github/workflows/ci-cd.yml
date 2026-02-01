@@ -1,0 +1,92 @@
+name: CI/CD Pipeline
+
+# ---------------------------------------------------------------------------
+# Déclenche le workflow sur push sur develop et PR vers main
+# ---------------------------------------------------------------------------
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test-docker:
+    # Utilisation d'une machine Ubuntu pour exécuter le pipeline
+    runs-on: ubuntu-latest
+
+    # -----------------------------------------------------------------------
+    # Services nécessaires pour les tests d'intégration
+    # Ici PostgreSQL pour tester la connexion DB
+    # -----------------------------------------------------------------------
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: analyse_text
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # ---------------------------------------------------------------------
+      # Récupération du code source du repository
+      # ---------------------------------------------------------------------
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v3
+
+      # ---------------------------------------------------------------------
+      # Installer la version Node.js utilisée par le projet
+      # ---------------------------------------------------------------------
+      - name: ⚡ Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      # ---------------------------------------------------------------------
+      # Installer toutes les dépendances npm
+      # ---------------------------------------------------------------------
+      - name: 📦 Install dependencies
+        run: npm install
+
+      # ---------------------------------------------------------------------
+      # Compiler le code TypeScript en JavaScript
+      # ---------------------------------------------------------------------
+      - name: 🏗️ Build TypeScript
+        run: npm run build
+
+      # ---------------------------------------------------------------------
+      # Lancer le lint pour vérifier le respect des règles de style
+      # ---------------------------------------------------------------------
+      - name: ✏️ Run Lint
+        run: npm run lint
+
+      # ---------------------------------------------------------------------
+      # Lancer les tests unitaires pour s'assurer que tout fonctionne
+      # ---------------------------------------------------------------------
+      - name: ✅ Run Unit Tests
+        run: npm test
+
+      # ---------------------------------------------------------------------
+      # Construire les conteneurs Docker pour l'application
+      # ---------------------------------------------------------------------
+      - name: 🐳 Build Docker containers
+        run: docker-compose -f docker-compose.yml build
+
+      # ---------------------------------------------------------------------
+      # Lancer l'application dans Docker et tester le endpoint /health
+      # Vérifie que le serveur est bien UP
+      # ---------------------------------------------------------------------
+      - name: 🌐 Test Health Endpoint
+        run: |
+          docker-compose -f docker-compose.yml up -d
+          sleep 10
+          curl -s http://localhost:3000/health | grep '"status":"UP"'
+          docker-compose down
