@@ -1,5 +1,6 @@
 // Import de Supertest pour simuler les requêtes HTTP
 import request from 'supertest';
+
 // Import de la fonction createApp qui retourne une instance d'Express configurée
 import { createApp } from '../src/app';
 

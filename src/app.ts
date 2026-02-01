@@ -1,5 +1,6 @@
 import express, { Application } from "express";
 import dotenv from "dotenv";
+
 import { setupMiddlewares } from "../config/middleware";
 import { setupSwagger } from "../config/swagger";
 import { setupRoutes } from "../routes";
