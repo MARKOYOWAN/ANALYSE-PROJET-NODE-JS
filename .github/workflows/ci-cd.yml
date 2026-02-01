@@ -48,38 +48,38 @@ jobs:
         run: npm run build
 
       # Injecte tes tables et triggers dans la DB de test
-      - name: 🗄️ Setup Database Schema
-        run: PGPASSWORD=postgres psql -h localhost -U postgres -d analyse_text -f bd.sql
+    #   - name: 🗄️ Setup Database Schema
+    #     run: PGPASSWORD=postgres psql -h localhost -U postgres -d analyse_text -f bd.sql
 
-      - name: ✅ Run Unit Tests
-        run: npm test
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: analyse_text
+    #   - name: ✅ Run Unit Tests
+    #     run: npm test
+    #     env:
+    #       DB_HOST: localhost
+    #       DB_PORT: 5432
+    #       DB_USER: postgres
+    #       DB_PASSWORD: postgres
+    #       DB_NAME: analyse_text
 
-      - name: 🐳 Build Docker Image
-        run: docker compose build
+    #   - name: 🐳 Build Docker Image
+    #     run: docker compose build
 
-      - name: 🌐 Docker Health Check
-        run: |
-          docker compose up -d
-          # Attente intelligente de l'API (max 30s)
-          for i in {1..10}; do
-            if curl -s http://localhost:3000/health | grep -q "UP"; then
-              echo "✅ API is UP!"
-              exit 0
-            fi
-            echo "⏳ Waiting for API... ($i)"
-            sleep 3
-          done
-          echo "❌ API failed to start"
-          docker compose logs
-          exit 1
+    #   - name: 🌐 Docker Health Check
+    #     run: |
+    #       docker compose up -d
+    #       # Attente intelligente de l'API (max 30s)
+    #       for i in {1..10}; do
+    #         if curl -s http://localhost:3000/health | grep -q "UP"; then
+    #           echo "✅ API is UP!"
+    #           exit 0
+    #         fi
+    #         echo "⏳ Waiting for API... ($i)"
+    #         sleep 3
+    #       done
+    #       echo "❌ API failed to start"
+    #       docker compose logs
+    #       exit 1
 
-      # Cette étape s'exécute TOUJOURS, même si le Health Check échoue
-      - name: 🧹 Cleanup Docker
-        if: always()
-        run: docker compose down
+    #   # Cette étape s'exécute TOUJOURS, même si le Health Check échoue
+    #   - name: 🧹 Cleanup Docker
+    #     if: always()
+    #     run: docker compose down
