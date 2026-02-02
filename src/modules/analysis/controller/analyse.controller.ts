@@ -1,64 +1,59 @@
-import { Request, Response } from "express"; 
+import { Request, Response } from "express";
 import { HistoryRepository } from "../../history/repository/history.repository";
 import { AnalysisService } from "../service/analysis.service";
 
 /**
- * POST /api/analyze
+ * AnalysisController
+ * ------------------
+ * Gère l'analyse d'un texte :
+ * - validation de l'entrée
+ * - calcul du score via AnalysisService
+ * - sauvegarde en base via HistoryRepository
+ *
+ * Route : POST /api/analyze
  */
-export const analyzeTextController = async (req: Request, res: Response) => {
+export const analyzeTextController = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
     const { text } = req.body;
 
+    // ✅ Validation des entrées
     if (!text || typeof text !== "string") {
       return res.status(400).json({
         success: false,
-        message: "Le champ 'text' est obligatoire et doit être une chaîne de caractères",
+        message:
+          "Le champ 'text' est obligatoire et doit être une chaîne de caractères",
       });
     }
 
-    // Instancier le service d'analyse
+    // 🧠 Analyse du texte
     const analysisService = new AnalysisService();
-
-    // Calculer le score automatiquement via la classe
     const score = analysisService.analyzeText(text);
 
-    // Sauvegarder dans la base
-    const historyRepo = new HistoryRepository();
-    const saved = await historyRepo.save({ text, score });
+    // 💾 Sauvegarde en base
+    const historyRepository = new HistoryRepository();
+    const savedAnalysis = await historyRepository.save({
+      text,
+      score,
+    });
 
+    // Réponse API standardisée
     return res.status(200).json({
       success: true,
       data: {
-        text: saved.text,
-        score: saved.score,
+        id: savedAnalysis.id,
+        text: savedAnalysis.text,
+        score: savedAnalysis.score,
       },
     });
-  } catch (error: any) {
-    console.error(error);
+  } catch (error) {
+    console.error("Erreur analyseTextController :", error);
+
     return res.status(500).json({
       success: false,
-      message: "Erreur serveur",
-    });
-  }
-};
-
-/**
- * GET /api/history
- */
-export const getHistoryController = async (req: Request, res: Response) => {
-  try {
-    const historyRepo = new HistoryRepository();
-    const allHistory = await historyRepo.findAll();
-
-    return res.status(200).json({
-      success: true,
-      data: allHistory,
-    });
-  } catch (error: any) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Erreur serveur",
+      message: "Erreur interne du serveur",
     });
   }
 };
