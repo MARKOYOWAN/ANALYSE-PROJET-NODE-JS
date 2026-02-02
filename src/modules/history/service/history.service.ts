@@ -1,33 +1,42 @@
-import { AnalysisHistory } from "../model/history.types";
-import { HistoryRepository } from "../repository/history.repository";
 import { AnalysisService } from "../../analysis/service/analyse.service";
+import { HistoryItemDTO } from "../model/history.types";
+import { HistoryRepository } from "../repository/history.repository";
 
+/**
+ * HistoryService
+ * --------------
+ * Gestion de l'historique des analyses avec logique métier
+ */
 export class HistoryService {
   constructor(
     private readonly historyRepository: HistoryRepository,
     private readonly analysisService: AnalysisService
-  ) {}
+  ) { }
 
   /**
    * Analyse un texte et sauvegarde le résultat
    */
-  async analyzeAndSave(text: string): Promise<AnalysisHistory> {
+  async analyzeAndSave(text: string): Promise<HistoryItemDTO> {
     const score = this.analysisService.analyzeText(text);
     return this.historyRepository.save({ text, score });
   }
 
   /**
    * Récupère l'historique avec pagination
-   * @param page Numéro de page (1 par défaut)
-   * @param limit Nombre d'éléments par page (10 par défaut)
+   * @param page Page actuelle
+   * @param limit Nombre d'éléments par page
    */
-  async getHistory(
-    page = 1,
-    limit = 10
-  ): Promise<{ data: AnalysisHistory[]; total: number; page: number; limit: number }> {
+  async getHistory(page = 1, limit = 10): Promise<{
+    data: HistoryItemDTO[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
     const offset = (page - 1) * limit;
-    const data = await this.historyRepository.findAll(limit, offset);
-    const total = await this.historyRepository.count();
+    const [data, total] = await Promise.all([
+      this.historyRepository.findAll(limit, offset),
+      this.historyRepository.count(),
+    ]);
 
     return { data, total, page, limit };
   }

@@ -1,5 +1,5 @@
 import pool from "../../../../config/BD/db";
-import { AnalysisHistory } from "../model/history.types";
+import { HistoryItemDTO } from "../model/history.types";
 
 export class HistoryRepository {
   /**
@@ -7,7 +7,7 @@ export class HistoryRepository {
    * @param limit Nombre de résultats par page (default 10)
    * @param offset Décalage pour pagination (default 0)
    */
-  async findAll(limit = 10, offset = 0): Promise<AnalysisHistory[]> {
+  async findAll(limit = 10, offset = 0): Promise<HistoryItemDTO[]> {
     const query = `
       SELECT id, text, score, created_on
       FROM analyse_text."SCORE_TEXT"
@@ -23,7 +23,7 @@ export class HistoryRepository {
   /**
    * Sauvegarde une analyse dans la base
    */
-  async save(data: { text: string; score: number }): Promise<AnalysisHistory> {
+  async save(data: { text: string; score: number }): Promise<HistoryItemDTO> {
     const query = `
       INSERT INTO analyse_text."SCORE_TEXT" (text, score)
       VALUES ($1, $2)
