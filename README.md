@@ -9,24 +9,40 @@ Une API robuste construite avec **Node.js** et **TypeScript** pour analyser des 
 
 ---
 
-## 📂 Structure du Projet
+## Structure du Projet
 
 ```text
 analyse-text-node-api/
 ├── src/
-│   ├── app.ts             # Configuration Express & Middlewares
-│   ├── server.ts          # Bootstrapping du serveur
-│   ├── config/            # Database, Swagger, Security
-│   ├── controllers/       # Logique de contrôle (MVC)
-│   ├── repositories/      # Couche d'accès aux données (SQL)
-│   ├── routes/            # Définition des points d'entrée
-│   └── utils/             # Helpers & Global Response Handler
-├── .env.example           # Modèle des variables d'environnement
-├── bd.sql                 # Schémas, Tables et Triggers SQL
-└── tsconfig.json          # Configuration TypeScript
+│   ├── app.ts                 # Configuration Express : middlewares globaux, cors, parsing JSON
+│   ├── server.ts              # Bootstrapping du serveur Node.js
+│   ├── config/                # Configurations globales
+│   │   ├── db/                # Connexion PostgreSQL
+│   │   ├── swagger.ts         # Documentation API
+│   │   └── security.ts        # Headers et sécurité (helmet, rate-limit)
+│   ├── modules/
+│   │   ├── analysis/          # Module d'analyse de texte
+│   │   │   ├── controller/    # Routes & controllers pour analyse (/api/analyze)
+│   │   │   ├── service/       # Logique de calcul du score (AnalysisService)
+│   │   │   └── model/         # Types et constantes (ex: ANALYSIS_RULES)
+│   │   └── history/           # Module historique
+│   │       ├── controller/    # Routes & controllers pour l'historique (/api/history)
+│   │       ├── service/       # Logique métier pour pagination & calcul
+│   │       ├── repository/    # Accès aux tables SQL (HistoryRepository)
+│   │       └── model/         # Types et interfaces
+│   ├── routes/                # Centralisation des routes
+│   │   ├── api/               # Préfixe /api
+│   │   │   ├── analyze.routes.ts
+│   │   │   └── history.routes.ts
+│   │   └── index.ts           # SetupRoutes : centralisation & 404 handler
+│   └── utils/                 # Helpers et fonctions globales
+├── .env.example               # Variables d'environnement à remplir
+├── bd.sql                     # Script SQL : schéma, tables, triggers et exemples
+├── package.json               # Dépendances & scripts npm
+└── tsconfig.json              # Configuration TypeScript
 ```
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 ```bash
 git clone [https://github.com/ton-utilisateur/analyse-text-node-api.git](https://github.com/ton-utilisateur/analyse-text-node-api.git)
@@ -46,7 +62,7 @@ DB_PASSWORD=ton_password
 DB_NAME=analyse_text
 ```
 
-## 🛠️ Configuration de la Base de Données
+## Configuration de la Base de Données
 
 Le projet délègue l'intégrité et le suivi temporel des données directement à **PostgreSQL** via des triggers automatiques. Cela garantit une précision maximale des données, indépendamment de la logique applicative.
 
@@ -69,7 +85,7 @@ Utilisez les scripts `npm` suivants pour piloter le cycle de vie de l'applicatio
 ---
 
 
-### 💡 Cycle de Déploiement Standard
+### Cycle de Déploiement Standard
 
 Pour garantir la stabilité de l'application, suivez cette séquence logique lors de la mise en production ou du déploiement sur un nouvel environnement :
 
@@ -82,21 +98,14 @@ Pour garantir la stabilité de l'application, suivez cette séquence logique lor
 
 ---
 
-> ⚠️ **Important** : Assurez-vous que votre base de données PostgreSQL est accessible et que le fichier `.env` est correctement configuré avant de lancer l'étape 3.
->
-> 
-
-## 📖 Documentation Interactive (Swagger)
-
-L'API intègre **Swagger UI**, permettant de visualiser et de tester tous les endpoints en temps réel sans avoir besoin d'outils tiers comme Postman.
+> **Important** : Assurez-vous que votre base de données PostgreSQL est accessible et que le fichier `.env` est correctement configuré avant de lancer l'étape 3.
 
 
-
-### 🔗 Accès local
+### Accès local
 Une fois le serveur démarré, ouvrez votre navigateur à l'adresse suivante :
 👉 **[http://localhost:3000/api-docs](http://localhost:3000/api-docs)**
 
-### ✨ Fonctionnalités incluses
+### Fonctionnalités incluses
 * **Exploration visuelle** : Liste complète des schémas de données et des routes.
 * **Test "Try it out"** : Exécutez des requêtes directement depuis l'interface.
 * **Modèles de données** : Visualisation claire des structures de requêtes (Request Body) et des réponses attendues.
@@ -105,7 +114,7 @@ Une fois le serveur démarré, ouvrez votre navigateur à l'adresse suivante :
 > 💡 *Note : Assurez-vous que le middleware Swagger est activé dans votre fichier `app.ts` pour que cette page soit accessible.*
 >
 > 
-## 📌 Points d'entrée (Endpoints)
+## Points d'entrée (Endpoints)
 
 | Méthode | Route | Description |
 | :--- | :--- | :--- |
@@ -114,7 +123,7 @@ Une fois le serveur démarré, ouvrez votre navigateur à l'adresse suivante :
 | `POST` | `/api/texts` | Analyse un nouveau texte et sauvegarde le score |
 
  
- ## 💡 Principes de Conception
+ ## Principes de Conception
 
 Le projet repose sur des standards de développement modernes pour garantir une maintenabilité à long terme et une robustesse accrue.
 
@@ -125,6 +134,22 @@ Le projet repose sur des standards de développement modernes pour garantir une 
 * **SQL Triggers** : Fiabilité au niveau de la donnée. La logique de timestamp (`updated_on`) est gérée nativement par PostgreSQL, évitant les incohérences entre l'application et la base de données.
 
 ---
+
+
+
+## Documentation API
+L'interface interactive Swagger est disponible dès que le serveur est lancé : 👉 http://localhost:3000/api-docs
+```bash
+┌─────────┬──────────────────┬─────────────────────────────────────────────┐
+│ METHOD  │ ENDPOINT         │ DESCRIPTION                                 │
+├─────────┼──────────────────┼─────────────────────────────────────────────┤
+│ POST    │ /api/analyze     │ Envoyer un texte pour analyse (score 0-100) │
+│ GET     │ /api/history     │ Récupérer l'historique des analyses         │
+└─────────┴──────────────────┴─────────────────────────────────────────────┘
+```
+
+🖥️ Endpoints Overview
+
 
 ## 📖 Technologies Utilisées
 
