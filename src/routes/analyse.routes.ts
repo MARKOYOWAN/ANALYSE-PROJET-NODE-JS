@@ -1,4 +1,5 @@
 import { Router } from "express";
+
 import { analyzeTextController } from "../modules/analysis/controller/analyse.controller";
 
 const router = Router();

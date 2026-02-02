@@ -1,4 +1,4 @@
-import { AnalysisService } from "../../analysis/service/analysis.service";
+import { AnalysisService } from "../../analysis/service/analyse.service";
 import { AnalysisHistory } from "../model/history.types";
 import { HistoryRepository } from "../repository/history.repository";
 

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
+
 import { HistoryRepository } from "../../history/repository/history.repository";
-import { AnalysisService } from "../service/analysis.service";
+import { AnalysisService } from "../service/analyse.service";
 
 /**
  * AnalysisController

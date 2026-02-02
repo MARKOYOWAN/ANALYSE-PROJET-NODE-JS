@@ -1,7 +1,6 @@
 import { Router } from "express";
 
 import analyzeRoutes from "./analyse.routes";
-
 import hystoryRoutes from "./history.routes";
 const router = Router();
 

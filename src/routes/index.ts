@@ -1,6 +1,5 @@
 import { Application } from "express";
 
-import healthRoutes from "./health.routes"; 
 import apiRoutes from "./api.routes";
 
 /**
@@ -9,9 +8,6 @@ import apiRoutes from "./api.routes";
  * Centralise toutes les routes de l'application
  */
 export const setupRoutes = (app: Application) => {
-  // Healthcheck (hors API)
-  app.use("/health", healthRoutes);
-
   // API globale
   app.use("/api", apiRoutes);
 
