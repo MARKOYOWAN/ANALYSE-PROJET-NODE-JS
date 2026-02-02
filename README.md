@@ -9,7 +9,7 @@ Une API robuste construite avec **Node.js** et **TypeScript** pour analyser des 
 
 ---
 
-## 📂 Structure du Projet
+## Structure du Projet
 
 ```text
 analyse-text-node-api/
@@ -42,7 +42,7 @@ analyse-text-node-api/
 └── tsconfig.json              # Configuration TypeScript
 ```
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 ```bash
 git clone [https://github.com/ton-utilisateur/analyse-text-node-api.git](https://github.com/ton-utilisateur/analyse-text-node-api.git)
@@ -62,7 +62,7 @@ DB_PASSWORD=ton_password
 DB_NAME=analyse_text
 ```
 
-## 🛠️ Configuration de la Base de Données
+## Configuration de la Base de Données
 
 Le projet délègue l'intégrité et le suivi temporel des données directement à **PostgreSQL** via des triggers automatiques. Cela garantit une précision maximale des données, indépendamment de la logique applicative.
 
@@ -85,7 +85,7 @@ Utilisez les scripts `npm` suivants pour piloter le cycle de vie de l'applicatio
 ---
 
 
-### 💡 Cycle de Déploiement Standard
+### Cycle de Déploiement Standard
 
 Pour garantir la stabilité de l'application, suivez cette séquence logique lors de la mise en production ou du déploiement sur un nouvel environnement :
 
@@ -98,21 +98,14 @@ Pour garantir la stabilité de l'application, suivez cette séquence logique lor
 
 ---
 
-> ⚠️ **Important** : Assurez-vous que votre base de données PostgreSQL est accessible et que le fichier `.env` est correctement configuré avant de lancer l'étape 3.
->
-> 
-
-## 📖 Documentation Interactive (Swagger)
-
-L'API intègre **Swagger UI**, permettant de visualiser et de tester tous les endpoints en temps réel sans avoir besoin d'outils tiers comme Postman.
+> **Important** : Assurez-vous que votre base de données PostgreSQL est accessible et que le fichier `.env` est correctement configuré avant de lancer l'étape 3.
 
 
-
-### 🔗 Accès local
+### Accès local
 Une fois le serveur démarré, ouvrez votre navigateur à l'adresse suivante :
 👉 **[http://localhost:3000/api-docs](http://localhost:3000/api-docs)**
 
-### ✨ Fonctionnalités incluses
+### Fonctionnalités incluses
 * **Exploration visuelle** : Liste complète des schémas de données et des routes.
 * **Test "Try it out"** : Exécutez des requêtes directement depuis l'interface.
 * **Modèles de données** : Visualisation claire des structures de requêtes (Request Body) et des réponses attendues.
@@ -121,7 +114,7 @@ Une fois le serveur démarré, ouvrez votre navigateur à l'adresse suivante :
 > 💡 *Note : Assurez-vous que le middleware Swagger est activé dans votre fichier `app.ts` pour que cette page soit accessible.*
 >
 > 
-## 📌 Points d'entrée (Endpoints)
+## Points d'entrée (Endpoints)
 
 | Méthode | Route | Description |
 | :--- | :--- | :--- |
@@ -130,7 +123,7 @@ Une fois le serveur démarré, ouvrez votre navigateur à l'adresse suivante :
 | `POST` | `/api/texts` | Analyse un nouveau texte et sauvegarde le score |
 
  
- ## 💡 Principes de Conception
+ ## Principes de Conception
 
 Le projet repose sur des standards de développement modernes pour garantir une maintenabilité à long terme et une robustesse accrue.
 
@@ -141,6 +134,22 @@ Le projet repose sur des standards de développement modernes pour garantir une 
 * **SQL Triggers** : Fiabilité au niveau de la donnée. La logique de timestamp (`updated_on`) est gérée nativement par PostgreSQL, évitant les incohérences entre l'application et la base de données.
 
 ---
+
+
+
+## Documentation API
+L'interface interactive Swagger est disponible dès que le serveur est lancé : 👉 http://localhost:3000/api-docs
+```bash
+┌─────────┬──────────────────┬─────────────────────────────────────────────┐
+│ METHOD  │ ENDPOINT         │ DESCRIPTION                                 │
+├─────────┼──────────────────┼─────────────────────────────────────────────┤
+│ POST    │ /api/analyze     │ Envoyer un texte pour analyse (score 0-100) │
+│ GET     │ /api/history     │ Récupérer l'historique des analyses         │
+└─────────┴──────────────────┴─────────────────────────────────────────────┘
+```
+
+🖥️ Endpoints Overview
+
 
 ## 📖 Technologies Utilisées
 
