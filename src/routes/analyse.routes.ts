@@ -1,14 +1,9 @@
 import { Router } from "express";
-
-import { analyzeTextController } from "../modules/analysis/controller/analyse.controller";
+import { getHistoryController } from "../modules/history/controller/history.controller";
 
 const router = Router();
 
-/**
- * POST /api/analysis
- * Analyse un texte et calcule le score
- */
-router.post("/", analyzeTextController);
-
+// GET /api/history
+router.get("/history", getHistoryController);
 
 export default router;

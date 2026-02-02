@@ -1,29 +1,37 @@
 import { Request, Response } from "express";
-
 import { HistoryRepository } from "../repository/history.repository";
+import { AnalysisService } from "../../analysis/service/analyse.service";
+import { HistoryService } from "../service/history.service";
 
 /**
- * HistoryController
- * -----------------
- * Gère la récupération de l'historique des analyses
- *
- * Route : GET /api/history
+ * GET /api/history
+ * ----------------
+ * Retourne l'historique des analyses avec pagination
+ * Query params : page (1 par défaut), limit (10 par défaut)
  */
-export const getHistoryController = async (
-    req: Request,
-    res: Response
-): Promise<Response> => {
+export const getHistoryController = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const historyRepository = new HistoryRepository();
-        const history = await historyRepository.findAll();
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+
+        const historyRepo = new HistoryRepository();
+        const analysisService = new AnalysisService(); // nécessaire pour le service
+        const historyService = new HistoryService(historyRepo, analysisService);
+
+        const result = await historyService.getHistory(page, limit);
 
         return res.status(200).json({
             success: true,
-            data: history,
+            data: result.data,
+            pagination: {
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
+                totalPages: Math.ceil(result.total / result.limit),
+            },
         });
     } catch (error) {
         console.error("Erreur getHistoryController :", error);
-
         return res.status(500).json({
             success: false,
             message: "Erreur interne du serveur",

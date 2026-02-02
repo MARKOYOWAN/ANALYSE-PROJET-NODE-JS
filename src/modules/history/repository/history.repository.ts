@@ -1,34 +1,34 @@
 import pool from "../../../../config/BD/db";
-import {
-  AnalysisHistory,
-  CreateAnalysisHistory
-} from "../model/history.types";
+import { AnalysisHistory } from "../model/history.types";
 
-/**
- * HistoryRepository
- * -----------------
- * Accès aux données de la table analyse_text.SCORE_TEXT
- */
 export class HistoryRepository {
+  /**
+   * Récupère tout l'historique des analyses avec pagination
+   * @param limit Nombre de résultats par page (default 10)
+   * @param offset Décalage pour pagination (default 0)
+   */
+  async findAll(limit = 10, offset = 0): Promise<AnalysisHistory[]> {
+    const query = `
+      SELECT id, text, score, created_on
+      FROM analyse_text."SCORE_TEXT"
+      ORDER BY created_on DESC
+      LIMIT $1 OFFSET $2
+    `;
+    const values = [limit, offset];
+
+    const { rows } = await pool.query(query, values);
+    return rows;
+  }
 
   /**
-   * Enregistrer une analyse
+   * Sauvegarde une analyse dans la base
    */
-  async save(
-    data: CreateAnalysisHistory
-  ): Promise<AnalysisHistory> {
-
+  async save(data: { text: string; score: number }): Promise<AnalysisHistory> {
     const query = `
-      INSERT INTO analyse_text."SCORE_TEXT" ("text", "score")
+      INSERT INTO analyse_text."SCORE_TEXT" (text, score)
       VALUES ($1, $2)
-      RETURNING
-        "id",
-        "text",
-        "score",
-        "created_on",
-        "updated_on"
+      RETURNING *
     `;
-
     const values = [data.text, data.score];
 
     const { rows } = await pool.query(query, values);
@@ -36,22 +36,11 @@ export class HistoryRepository {
   }
 
   /**
-   * Récupérer l'historique des analyses
+   * Récupère le nombre total d'analyses pour la pagination
    */
-  async findAll(): Promise<AnalysisHistory[]> {
-
-    const query = `
-      SELECT
-        "id",
-        "text",
-        "score",
-        "created_on",
-        "updated_on"
-      FROM analyse_text."SCORE_TEXT"
-      ORDER BY "created_on" DESC
-    `;
-
+  async count(): Promise<number> {
+    const query = `SELECT COUNT(*) AS total FROM analyse_text."SCORE_TEXT"`;
     const { rows } = await pool.query(query);
-    return rows;
+    return parseInt(rows[0].total, 10);
   }
 }

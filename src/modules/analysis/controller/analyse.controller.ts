@@ -1,57 +1,37 @@
 import { Request, Response } from "express";
-
+import { AnalysisService } from "../../analysis/service/analyse.service";
 import { HistoryRepository } from "../../history/repository/history.repository";
-import { AnalysisService } from "../service/analyse.service";
+import { HistoryService } from "../../history/service/history.service";
 
 /**
- * AnalysisController
- * ------------------
- * Gère l'analyse d'un texte :
- * - validation de l'entrée
- * - calcul du score via AnalysisService
- * - sauvegarde en base via HistoryRepository
- *
- * Route : POST /api/analyze
+ * GET /api/history
+ * ----------------
+ * Retourne l'historique des analyses avec pagination
+ * Query params : page (1 par défaut), limit (10 par défaut)
  */
-export const analyzeTextController = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const getHistoryController = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const { text } = req.body;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
 
-    // ✅ Validation des entrées
-    if (!text || typeof text !== "string") {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Le champ 'text' est obligatoire et doit être une chaîne de caractères",
-      });
-    }
+    const historyRepo = new HistoryRepository();
+    const analysisService = new AnalysisService(); // nécessaire pour le service
+    const historyService = new HistoryService(historyRepo, analysisService);
 
-    // 🧠 Analyse du texte
-    const analysisService = new AnalysisService();
-    const score = analysisService.analyzeText(text);
+    const result = await historyService.getHistory(page, limit);
 
-    // 💾 Sauvegarde en base
-    const historyRepository = new HistoryRepository();
-    const savedAnalysis = await historyRepository.save({
-      text,
-      score,
-    });
-
-    // Réponse API standardisée
     return res.status(200).json({
       success: true,
-      data: {
-        id: savedAnalysis.id,
-        text: savedAnalysis.text,
-        score: savedAnalysis.score,
+      data: result.data,
+      pagination: {
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        totalPages: Math.ceil(result.total / result.limit),
       },
     });
   } catch (error) {
-    console.error("Erreur analyseTextController :", error);
-
+    console.error("Erreur getHistoryController :", error);
     return res.status(500).json({
       success: false,
       message: "Erreur interne du serveur",

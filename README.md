@@ -14,16 +14,32 @@ Une API robuste construite avec **Node.js** et **TypeScript** pour analyser des 
 ```text
 analyse-text-node-api/
 ├── src/
-│   ├── app.ts             # Configuration Express & Middlewares
-│   ├── server.ts          # Bootstrapping du serveur
-│   ├── config/            # Database, Swagger, Security
-│   ├── controllers/       # Logique de contrôle (MVC)
-│   ├── repositories/      # Couche d'accès aux données (SQL)
-│   ├── routes/            # Définition des points d'entrée
-│   └── utils/             # Helpers & Global Response Handler
-├── .env.example           # Modèle des variables d'environnement
-├── bd.sql                 # Schémas, Tables et Triggers SQL
-└── tsconfig.json          # Configuration TypeScript
+│   ├── app.ts                 # Configuration Express : middlewares globaux, cors, parsing JSON
+│   ├── server.ts              # Bootstrapping du serveur Node.js
+│   ├── config/                # Configurations globales
+│   │   ├── db/                # Connexion PostgreSQL
+│   │   ├── swagger.ts         # Documentation API
+│   │   └── security.ts        # Headers et sécurité (helmet, rate-limit)
+│   ├── modules/
+│   │   ├── analysis/          # Module d'analyse de texte
+│   │   │   ├── controller/    # Routes & controllers pour analyse (/api/analyze)
+│   │   │   ├── service/       # Logique de calcul du score (AnalysisService)
+│   │   │   └── model/         # Types et constantes (ex: ANALYSIS_RULES)
+│   │   └── history/           # Module historique
+│   │       ├── controller/    # Routes & controllers pour l'historique (/api/history)
+│   │       ├── service/       # Logique métier pour pagination & calcul
+│   │       ├── repository/    # Accès aux tables SQL (HistoryRepository)
+│   │       └── model/         # Types et interfaces
+│   ├── routes/                # Centralisation des routes
+│   │   ├── api/               # Préfixe /api
+│   │   │   ├── analyze.routes.ts
+│   │   │   └── history.routes.ts
+│   │   └── index.ts           # SetupRoutes : centralisation & 404 handler
+│   └── utils/                 # Helpers et fonctions globales
+├── .env.example               # Variables d'environnement à remplir
+├── bd.sql                     # Script SQL : schéma, tables, triggers et exemples
+├── package.json               # Dépendances & scripts npm
+└── tsconfig.json              # Configuration TypeScript
 ```
 
 ## ⚙️ Installation & Setup
