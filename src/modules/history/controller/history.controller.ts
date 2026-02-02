@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+
 import { HistoryRepository } from "../repository/history.repository";
 import { AnalysisService } from "../../analysis/service/analyse.service";
 import { HistoryService } from "../service/history.service";

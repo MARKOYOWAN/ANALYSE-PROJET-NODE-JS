@@ -1,4 +1,5 @@
 import { Router } from "express";
+
 import { getHistoryController } from "../modules/history/controller/history.controller";
 
 const router = Router();

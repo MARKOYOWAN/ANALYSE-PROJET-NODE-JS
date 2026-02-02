@@ -1,39 +1,54 @@
 import { Request, Response } from "express";
-import { AnalysisService } from "../../analysis/service/analyse.service";
+
 import { HistoryRepository } from "../../history/repository/history.repository";
-import { HistoryService } from "../../history/service/history.service";
+import { AnalysisService } from "../service/analyse.service";
+import { AnalyzeRequest, AnalyzeResult } from "../model/analyse.types";
 
 /**
- * GET /api/history
- * ----------------
- * Retourne l'historique des analyses avec pagination
- * Query params : page (1 par défaut), limit (10 par défaut)
+ * AnalysisController
+ * ------------------
+ * Gère l'analyse d'un texte :
+ * - validation de l'entrée via DTO AnalyzeRequest
+ * - calcul du score via AnalysisService
+ * - sauvegarde en base via HistoryRepository
+ *
+ * Route : POST /api/analyze
  */
-export const getHistoryController = async (req: Request, res: Response): Promise<Response> => {
+export const analyzeTextController = async (
+  req: Request<object, object, AnalyzeRequest>, // <Params, ResBody, ReqBody>
+  res: Response<AnalyzeResult | { score: number; status: "error"; message: string }>
+): Promise<Response> => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const { text } = req.body;
 
-    const historyRepo = new HistoryRepository();
-    const analysisService = new AnalysisService(); // nécessaire pour le service
-    const historyService = new HistoryService(historyRepo, analysisService);
+    // Validation des entrées
+    if (!text || typeof text !== "string") {
+      return res.status(400).json({
+        score: 0,
+        status: "error",
+        message: "Le champ 'text' est obligatoire et doit être une chaîne de caractères",
+      });
+    }
 
-    const result = await historyService.getHistory(page, limit);
+    // Analyse du texte
+    const analysisService = new AnalysisService();
+    const score = analysisService.analyzeText(text);
 
+    // Sauvegarde en base
+    const historyRepository = new HistoryRepository();
+    await historyRepository.save({ text, score });
+
+    // Réponse API typée
     return res.status(200).json({
-      success: true,
-      data: result.data,
-      pagination: {
-        total: result.total,
-        page: result.page,
-        limit: result.limit,
-        totalPages: Math.ceil(result.total / result.limit),
-      },
+      score,
+      status: "ok",
     });
   } catch (error) {
-    console.error("Erreur getHistoryController :", error);
+    console.error("Erreur analyseTextController :", error);
+
     return res.status(500).json({
-      success: false,
+      score: 0,
+      status: "error",
       message: "Erreur interne du serveur",
     });
   }

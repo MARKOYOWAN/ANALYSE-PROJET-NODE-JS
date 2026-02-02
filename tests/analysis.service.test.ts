@@ -1,4 +1,4 @@
-import { ANALYSIS_RULES } from "../src/modules/analysis/model/analysis.rules";
+import { ANALYSIS_RULES } from "../src/modules/analysis/model/analyse.rules";
 import { AnalysisService } from "../src/modules/analysis/service/analyse.service";
 
 describe("AnalysisService", () => {
