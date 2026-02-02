@@ -3,8 +3,9 @@ import dotenv from "dotenv";
 
 import { setupMiddlewares } from "../config/middleware";
 import { setupSwagger } from "../config/swagger";
-import { setupRoutes } from "../routes";
 import { errorHandler } from "../config/errorHandler";
+
+import { setupRoutes } from "./routes";
 
 // Charger les variables d'environnement
 dotenv.config();
