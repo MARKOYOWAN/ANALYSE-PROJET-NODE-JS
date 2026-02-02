@@ -11,6 +11,68 @@ import { HistoryResponseDTO } from "../model/history.types";
  * Retourne l'historique des analyses avec pagination
  * Query params : page (1 par défaut), limit (10 par défaut)
  */
+
+/**
+ * @swagger
+ * tags:
+ *   name: History
+ *   description: Historique des analyses
+ */
+
+/**
+ * @swagger
+ * /api/history:
+ *   get:
+ *     summary: Récupère l'historique des analyses avec pagination
+ *     tags: [History]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Numéro de la page
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Nombre d'éléments par page
+ *     responses:
+ *       200:
+ *         description: Historique récupéré
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: number
+ *                       text:
+ *                         type: string
+ *                       score:
+ *                         type: number
+ *                       created_on:
+ *                         type: string
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: number
+ *                     page:
+ *                       type: number
+ *                     limit:
+ *                       type: number
+ *                     totalPages:
+ *                       type: number
+ */
 export const getHistoryController = async (
     req: Request,
     res: Response

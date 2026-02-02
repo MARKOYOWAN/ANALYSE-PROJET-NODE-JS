@@ -4,6 +4,58 @@ import { HistoryRepository } from "../../history/repository/history.repository";
 import { AnalysisService } from "../service/analyse.service";
 import { AnalyzeRequest, AnalyzeResult } from "../model/analyse.types";
 
+
+
+/**
+ * @swagger
+ * /api/analyze:
+ *   post:
+ *     summary: Analyse un texte et retourne le score
+ *     tags:
+ *       - Analyse
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AnalyzeRequest'
+ *     responses:
+ *       200:
+ *         description: Score calculé
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AnalyzeResult'
+ *       400:
+ *         description: Entrée invalide
+ *       500:
+ *         description: Erreur serveur
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     AnalyzeRequest:
+ *       type: object
+ *       properties:
+ *         text:
+ *           type: string
+ *           example: "Ceci est un texte de test"
+ *       required:
+ *         - text
+ *     AnalyzeResult:
+ *       type: object
+ *       properties:
+ *         score:
+ *           type: integer
+ *           example: 72
+ *         status:
+ *           type: string
+ *           example: "ok"
+ */
+
+
 /**
  * AnalysisController
  * ------------------
@@ -14,6 +66,8 @@ import { AnalyzeRequest, AnalyzeResult } from "../model/analyse.types";
  *
  * Route : POST /api/analyze
  */
+
+
 export const analyzeTextController = async (
   req: Request<object, object, AnalyzeRequest>, // <Params, ResBody, ReqBody>
   res: Response<AnalyzeResult | { score: number; status: "error"; message: string }>
